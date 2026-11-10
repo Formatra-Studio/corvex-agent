@@ -202,6 +202,7 @@ func (c *SFTPServer) Run() error {
 	}
 
 	conf := &ssh.ServerConfig{
+		ServerVersion: "SSH-2.0-CorvexAgent",
 		Config: ssh.Config{
 			KeyExchanges: []string{
 				"curve25519-sha256", "curve25519-sha256@libssh.org",

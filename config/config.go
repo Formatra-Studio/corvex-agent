@@ -28,7 +28,7 @@ import (
 	"github.com/pterodactyl/wings/system"
 )
 
-const DefaultLocation = "/etc/pterodactyl/config.yml"
+const DefaultLocation = "/etc/corvex-agent/config.yml"
 
 // DefaultTLSConfig sets sane defaults to use when configuring the internal
 // webserver to listen for public connections.
@@ -137,23 +137,23 @@ type RemoteQueryConfiguration struct {
 // SystemConfiguration defines basic system configuration settings.
 type SystemConfiguration struct {
 	// The root directory where all of the pterodactyl data is stored at.
-	RootDirectory string `default:"/var/lib/pterodactyl" json:"-" yaml:"root_directory"`
+	RootDirectory string `default:"/var/lib/corvex-agent" json:"-" yaml:"root_directory"`
 
 	// Directory where logs for server installations and other wings events are logged.
-	LogDirectory string `default:"/var/log/pterodactyl" json:"-" yaml:"log_directory"`
+	LogDirectory string `default:"/var/log/corvex-agent" json:"-" yaml:"log_directory"`
 
 	// Directory where the server data is stored at.
-	Data string `default:"/var/lib/pterodactyl/volumes" json:"-" yaml:"data"`
+	Data string `default:"/var/lib/corvex-agent/volumes" json:"-" yaml:"data"`
 
 	// Directory where server archives for transferring will be stored.
-	ArchiveDirectory string `default:"/var/lib/pterodactyl/archives" json:"-" yaml:"archive_directory"`
+	ArchiveDirectory string `default:"/var/lib/corvex-agent/archives" json:"-" yaml:"archive_directory"`
 
 	// Directory where local backups will be stored on the machine.
-	BackupDirectory string `default:"/var/lib/pterodactyl/backups" json:"-" yaml:"backup_directory"`
+	BackupDirectory string `default:"/var/lib/corvex-agent/backups" json:"-" yaml:"backup_directory"`
 
 	// TmpDirectory specifies where temporary files for Pterodactyl installation processes
 	// should be created. This supports environments running docker-in-docker.
-	TmpDirectory string `default:"/tmp/pterodactyl" json:"-" yaml:"tmp_directory"`
+	TmpDirectory string `default:"/tmp/corvex-agent" json:"-" yaml:"tmp_directory"`
 
 	// The user that should own all of the server files, and be used for containers.
 	Username string `default:"pterodactyl" yaml:"username"`
@@ -347,7 +347,7 @@ type Configuration struct {
 	// if the debug flag is passed through the command line arguments.
 	Debug bool
 
-	AppName string `default:"Pterodactyl" json:"app_name" yaml:"app_name"`
+	AppName string `default:"Corvex" json:"app_name" yaml:"app_name"`
 
 	// A unique identifier for this node in the Panel.
 	Uuid string
@@ -463,6 +463,9 @@ func NewAtPath(path string) (*Configuration, error) {
 	}
 	// Track the location where we created this configuration.
 	c.path = path
+	if c.UsesLegacyDefaults() {
+		applyLegacyDefaults(&c)
+	}
 	return &c, nil
 }
 
@@ -811,7 +814,7 @@ func EnableLogRotation() error {
 	} else if (err != nil && os.IsNotExist(err)) || !st.IsDir() {
 		return nil
 	}
-	if _, err := os.Stat("/etc/logrotate.d/wings"); err == nil || !os.IsNotExist(err) {
+	if _, err := os.Stat("/etc/logrotate.d/corvex-agent"); err == nil || !os.IsNotExist(err) {
 		return err
 	}
 
@@ -819,13 +822,13 @@ func EnableLogRotation() error {
 	// If we've gotten to this point it means the logrotate directory exists on the system
 	// but there is not a file for wings already. In that case, let us write a new file to
 	// it so files can be rotated easily.
-	f, err := os.Create("/etc/logrotate.d/wings")
+	f, err := os.Create("/etc/logrotate.d/corvex-agent")
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	t, err := template.New("logrotate").Parse(`{{.LogDirectory}}/wings.log {
+	t, err := template.New("logrotate").Parse(`{{.LogDirectory}}/corvex-agent.log {
     size 10M
     compress
     delaycompress
@@ -834,7 +837,7 @@ func EnableLogRotation() error {
     missingok
     notifempty
     postrotate
-        /usr/bin/systemctl kill -s HUP wings.service >/dev/null 2>&1 || true
+        /usr/bin/systemctl kill -s HUP corvex-agent.service >/dev/null 2>&1 || true
     endscript
 }`)
 	if err != nil {

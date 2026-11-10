@@ -25,7 +25,10 @@ func getSystemInformation(c *gin.Context) {
 	}
 
 	if c.Query("v") == "2" {
-		c.JSON(http.StatusOK, i)
+		c.JSON(http.StatusOK, struct {
+			*system.Information
+			system.AgentInformation
+		}{i, system.CurrentAgentInformation()})
 		return
 	}
 
@@ -35,12 +38,14 @@ func getSystemInformation(c *gin.Context) {
 		KernelVersion string `json:"kernel_version"`
 		OS            string `json:"os"`
 		Version       string `json:"version"`
+		system.AgentInformation
 	}{
-		Architecture:  i.System.Architecture,
-		CPUCount:      i.System.CPUThreads,
-		KernelVersion: i.System.KernelVersion,
-		OS:            i.System.OSType,
-		Version:       i.Version,
+		Architecture:     i.System.Architecture,
+		CPUCount:         i.System.CPUThreads,
+		KernelVersion:    i.System.KernelVersion,
+		OS:               i.System.OSType,
+		Version:          i.Version,
+		AgentInformation: system.CurrentAgentInformation(),
 	})
 }
 

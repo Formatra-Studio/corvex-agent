@@ -1,0 +1,34 @@
+name: Corvex CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"
+      - name: go vet
+        run: go vet ./...
+      - name: go test
+        run: go test ./...
+      - name: go test -race
+        env:
+          CGO_ENABLED: 1
+        run: go test -race ./...
+      - name: Release build is reproducible
+        run: |
+          scripts/build-release.sh 0.0.0-cvx.0 /tmp/a
+          scripts/build-release.sh 0.0.0-cvx.0 /tmp/b
+          diff /tmp/a/SHA256SUMS /tmp/b/SHA256SUMS

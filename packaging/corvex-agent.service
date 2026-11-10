@@ -1,0 +1,18 @@
+[Unit]
+Description=Corvex Agent (node daemon)
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+User=root
+WorkingDirectory=/etc/corvex-agent
+LimitNOFILE=4096
+ExecStart=/usr/local/bin/corvex-agent
+Restart=on-failure
+StartLimitInterval=180
+StartLimitBurst=30
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

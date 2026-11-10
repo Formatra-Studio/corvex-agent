@@ -380,7 +380,7 @@ func (ip *InstallationProcess) AfterExecute(containerId string) error {
 	// variables passed into the container to make debugging things a little easier.
 	ip.Server.Log().WithField("path", ip.GetLogPath()).Debug("writing most recent installation logs to disk")
 
-	tmpl, err := template.New("header").Parse(`Pterodactyl Server Installation Log
+	tmpl, err := template.New("header").Parse(`Server Installation Log
 
 |
 | Details

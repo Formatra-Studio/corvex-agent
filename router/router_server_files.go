@@ -468,7 +468,7 @@ func postServerDecompressFiles(c *gin.Context) {
 	if err != nil {
 		if filesystem.IsErrorCode(err, filesystem.ErrCodeUnknownArchive) {
 			lg.WithField("error", err).Warn("failed to decompress file: unknown archive format")
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "The archive provided is in a format Wings does not understand."})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "The archive provided is in a format the node daemon does not understand."})
 			return
 		}
 		middleware.CaptureAndAbort(c, err)
