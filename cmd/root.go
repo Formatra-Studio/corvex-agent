@@ -42,19 +42,19 @@ import (
 )
 
 var (
-	configPath = config.DefaultLocation
+	configPath = config.DefaultConfigLocation()
 	debug      = false
 )
 
 var rootCommand = &cobra.Command{
-	Use:   "wings",
-	Short: "Runs the API server allowing programmatic control of game servers for Pterodactyl Panel.",
+	Use:   "corvex-agent",
+	Short: "Runs Corvex Agent, the node daemon that runs game servers for the Corvex panel.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
 		initLogging()
 		if tls, _ := cmd.Flags().GetBool("auto-tls"); tls {
 			if host, _ := cmd.Flags().GetString("tls-hostname"); host == "" {
-				fmt.Println("A TLS hostname must be provided when running wings with automatic TLS, e.g.:\n\n    ./wings --auto-tls --tls-hostname my.example.com")
+				fmt.Println("A TLS hostname must be provided when running corvex-agent with automatic TLS, e.g.:\n\n    ./corvex-agent --auto-tls --tls-hostname my.example.com")
 				os.Exit(1)
 			}
 		}
@@ -66,7 +66,7 @@ var versionCommand = &cobra.Command{
 	Use:   "version",
 	Short: "Prints the current executable version and exits.",
 	Run: func(cmd *cobra.Command, _ []string) {
-		fmt.Printf("wings v%s\nCopyright © 2018 - %d Dane Everitt & Contributors\n", system.Version, time.Now().Year())
+		fmt.Printf("corvex-agent v%s (based on Pterodactyl Wings v%s)\nCopyright © 2018 - %d Dane Everitt & Contributors\n", system.AgentVersion, system.Version, time.Now().Year())
 	},
 }
 
@@ -77,14 +77,14 @@ func Execute() {
 }
 
 func init() {
-	rootCommand.PersistentFlags().StringVar(&configPath, "config", config.DefaultLocation, "set the location for the configuration file")
-	rootCommand.PersistentFlags().BoolVar(&debug, "debug", false, "pass in order to run wings in debug mode")
+	rootCommand.PersistentFlags().StringVar(&configPath, "config", config.DefaultConfigLocation(), "set the location for the configuration file")
+	rootCommand.PersistentFlags().BoolVar(&debug, "debug", false, "pass in order to run corvex-agent in debug mode")
 
 	// Flags specifically used when running the API.
 	rootCommand.Flags().Bool("pprof", false, "if the pprof profiler should be enabled. The profiler will bind to localhost:6060 by default")
 	rootCommand.Flags().Int("pprof-block-rate", 0, "enables block profile support, may have performance impacts")
 	rootCommand.Flags().Int("pprof-port", 6060, "If provided with --pprof, the port it will run on")
-	rootCommand.Flags().Bool("auto-tls", false, "pass in order to have wings generate and manage its own SSL certificates using Let's Encrypt")
+	rootCommand.Flags().Bool("auto-tls", false, "pass in order to have corvex-agent generate and manage its own SSL certificates using Let's Encrypt")
 	rootCommand.Flags().String("tls-hostname", "", "required with --auto-tls, the FQDN for the generated SSL certificate")
 	rootCommand.Flags().Bool("ignore-certificate-errors", false, "ignore certificate verification errors when executing API calls")
 
@@ -109,13 +109,13 @@ func rootCmdRun(cmd *cobra.Command, _ []string) {
 		log.WithField("error", err).Fatal("failed to detect system timezone or use supplied configuration value")
 		return
 	}
-	log.WithField("timezone", config.Get().System.Timezone).Info("configured wings with system timezone")
+	log.WithField("timezone", config.Get().System.Timezone).Info("configured corvex-agent with system timezone")
 	if err := config.ConfigureDirectories(); err != nil {
-		log.WithField("error", err).Fatal("failed to configure system directories for pterodactyl")
+		log.WithField("error", err).Fatal("failed to configure system directories for corvex-agent")
 		return
 	}
 	if err := config.EnsurePterodactylUser(); err != nil {
-		log.WithField("error", err).Fatal("failed to create pterodactyl system user")
+		log.WithField("error", err).Fatal("failed to create the system user")
 		return
 	}
 	if err := config.ConfigurePasswd(); err != nil {
@@ -289,7 +289,7 @@ func rootCmdRun(cmd *cobra.Command, _ []string) {
 	}
 
 	httpConnections, sftpConnections := connectionLimits()
-	log.WithFields(log.Fields{"http": httpConnections, "sftp": sftpConnections}).Info("limiting the number of open connections, raise the open file limit for Wings to allow more")
+	log.WithFields(log.Fields{"http": httpConnections, "sftp": sftpConnections}).Info("limiting the number of open connections, raise the open file limit for corvex-agent to allow more")
 
 	go func() {
 		// Run the SFTP server.
@@ -476,10 +476,10 @@ func initLogging() {
 	if err := os.MkdirAll(path.Join(dir, "/install"), 0o700); err != nil {
 		log2.Fatalf("cmd/root: failed to create install directory path: %s", err)
 	}
-	p := filepath.Join(dir, "/wings.log")
+	p := filepath.Join(dir, config.LogFileName)
 	w, err := logrotate.NewFile(p)
 	if err != nil {
-		log2.Fatalf("cmd/root: failed to create wings log: %s", err)
+		log2.Fatalf("cmd/root: failed to create corvex-agent log: %s", err)
 	}
 	log.SetLevel(log.InfoLevel)
 	if config.Get().Debug {
@@ -489,40 +489,33 @@ func initLogging() {
 	log.WithField("path", p).Info("writing log files to disk")
 }
 
-// Prints the wings logo, nothing special here!
+// Prints the startup banner.
 func printLogo() {
 	fmt.Printf(colorstring.Color(`
-                     ____
-__ [blue][bold]Pterodactyl[reset] _____/___/_______ _______ ______
-\_____\    \/\/    /   /       /  __   /   ___/
-   \___\          /   /   /   /  /_/  /___   /
-        \___/\___/___/___/___/___    /______/
-                            /_______/ [bold]%s[reset]
+[blue][bold]Corvex Agent[reset] [bold]v%s[reset] (based on Pterodactyl Wings v%s)
 
 Copyright © 2018 - %d Dane Everitt & Contributors
-
-Website:  https://pterodactyl.io
- Source:  https://github.com/pterodactyl/wings
-License:  https://github.com/pterodactyl/wings/blob/develop/LICENSE
+Corvex Agent is based on Pterodactyl Wings (MIT): https://github.com/pterodactyl/wings
 
 This software is made available under the terms of the MIT license.
 The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.%s`), system.Version, time.Now().Year(), "\n\n")
+in all copies or substantial portions of the Software.%s`), system.AgentVersion, system.Version, time.Now().Year(), "\n\n")
 }
 
 func exitWithConfigurationNotice() {
 	fmt.Printf(colorstring.Color(`
 [_red_][white][bold]Error: Configuration File Not Found[reset]
 
-Wings was not able to locate your configuration file, and therefore is not
+Corvex Agent was not able to locate its configuration file, and therefore is not
 able to complete its boot process. Please ensure you have copied your instance
-configuration file into the default location below.
+configuration file into the default location below. A node that moved over
+from Pterodactyl Wings may keep it at %s instead.
 
 Default Location: %s
 
 [yellow]This is not a bug with this software. Please do not make a bug report
 for this issue, it will be closed.[reset]
 
-`), config.DefaultLocation)
+`), config.LegacyLocation, config.DefaultLocation)
 	os.Exit(1)
 }

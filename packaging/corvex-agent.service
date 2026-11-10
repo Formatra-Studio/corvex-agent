@@ -1,0 +1,19 @@
+[Unit]
+Description=Corvex Agent (node daemon)
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+# Start limits belong in [Unit]; systemd ignores them in [Service].
+StartLimitIntervalSec=180
+StartLimitBurst=30
+
+[Service]
+User=root
+WorkingDirectory=/etc/corvex-agent
+LimitNOFILE=4096
+ExecStart=/usr/local/bin/corvex-agent
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

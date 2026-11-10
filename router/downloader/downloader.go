@@ -23,6 +23,7 @@ import (
 	"github.com/pterodactyl/wings/config"
 	wnet "github.com/pterodactyl/wings/internal/network"
 	"github.com/pterodactyl/wings/server"
+	"github.com/pterodactyl/wings/system"
 )
 
 var client *http.Client
@@ -210,7 +211,7 @@ func (dl *Download) Execute() error {
 		return errors.WrapIf(err, "downloader: failed to create request")
 	}
 
-	req.Header.Set("User-Agent", "Pterodactyl Panel (https://pterodactyl.io)")
+	req.Header.Set("User-Agent", "Corvex Agent/v"+system.AgentVersion)
 	res, err := client.Do(req)
 	if err != nil {
 		if IsDownloadError(err) {

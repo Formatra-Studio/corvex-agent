@@ -1,55 +1,74 @@
-<p align="center">
-  <a href="https://pterodactyl.io">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-dark.svg">
-      <img alt="Pterodactyl" src=".github/assets/logo-light.svg" height="72">
-    </picture>
-  </a>
-</p>
+# Corvex Agent
 
-![Discord](https://img.shields.io/discord/122900397965705216?label=Discord&logo=Discord&logoColor=white)
-![GitHub Releases](https://img.shields.io/github/downloads/pterodactyl/wings/latest/total)
-[![Go Report Card](https://goreportcard.com/badge/github.com/pterodactyl/wings)](https://goreportcard.com/report/github.com/pterodactyl/wings)
+The node daemon for [Corvex](https://github.com/Formatra-Studio/Corvex-Panel). It runs game
+servers in Docker and speaks the Pterodactyl Wings protocol unchanged, so a Corvex panel can mix
+Corvex Agent nodes and plain Wings nodes.
 
-# Pterodactyl Wings
+**Corvex Agent is based on Pterodactyl Wings (MIT).** See `LICENSE`, `NOTICE` and, for every
+change from upstream, `BRANDING.md`.
 
-Wings is Pterodactyl's server control plane, built for the rapidly changing gaming industry and designed to be
-highly performant and secure. Wings provides an HTTP API allowing you to interface directly with running server
-instances, fetch server logs, generate backups, and control all aspects of the server lifecycle.
+## Layout on a node
 
-In addition, Wings ships with a built-in SFTP server allowing your system to remain free of Pterodactyl specific
-dependencies, and allowing users to authenticate with the same credentials they would normally use to access the Panel.
+| | New install | Node migrated from Wings |
+|---|---|---|
+| Binary / unit | `/usr/local/bin/corvex-agent`, `corvex-agent.service` | same |
+| Config | `/etc/corvex-agent/config.yml` | `/etc/pterodactyl/config.yml` (read automatically when the agent file does not exist) |
+| Data | `/var/lib/corvex-agent/{volumes,archives,backups}` | unchanged (`/var/lib/pterodactyl/...`) |
+| Logs | `/var/log/corvex-agent/corvex-agent.log` | `/var/log/pterodactyl/corvex-agent.log` |
+| Docker network | `corvex_nw` (bridge `corvex0`) | unchanged (`pterodactyl_nw`) |
+| System user | `corvex` (uid 988) | unchanged (`pterodactyl`) |
+| Runtime files / state | `/run/corvex-agent`, `corvex-agent.db` | unchanged (`/run/wings`, `wings.db`) |
 
-## Pterodactyl v2 is coming soon
+## Build
 
-Wings is stable and remains the daemon for Pterodactyl: the same Wings is used with the upcoming Panel v2.
+Go version from `go.mod`.
 
-[![Watch: Introducing Pterodactyl v2](.github/assets/v2-video.jpg)](https://www.youtube.com/watch?v=1ER4kv0jVEU)
+```
+go test ./...
+scripts/build-release.sh 1.13.4-cvx.1 dist    # dist/corvex-agent_linux_{amd64,arm64} + SHA256SUMS
+```
 
-## Sponsors
+Builds are deterministic: CI builds twice and compares the checksums. To check a release independently,
+rebuild the tag with the same Go version and compare with `SHA256SUMS`.
 
-I would like to extend my sincere thanks to the following sponsors for helping fund Pterodactyl's development.
-[Interested in becoming a sponsor?](https://github.com/sponsors/pterodactyl)
+## Release
 
-| Company                                                                           | About                                                                                                                                                                                                                                           |
-|-----------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [**Buildurly**](https://buildurly.com/)                                           | Buildurly is a hardware procurement company. They deliver tailored, enterprise-grade hardware solutions designed around your unique needs. From sourcing to delivery, Buildurly's white-glove service ensures a seamless, worry-free, professional experience.                                                                                                                                          |
-| [**Hosturly**](https://hosturly.com/)                                             | Hosturly is an enterprise hosting provider. They provide cost-effective, high-performance, and reliable services, including VPS, Web, Dedicated, and Colocation.                                                                                |
-| [**indifferent broccoli**](https://indifferentbroccoli.com/)                      | indifferent broccoli is a game server hosting and rental company. With them, you get top-notch computer power for your gaming sessions. They destroy lag, latency, and complexity--letting you focus on the fun stuff.                         |
-| [**Infraly, LLC**](https://infraly.co/)                                           | Infraly is an infrastructure company powering the next generation of online services. Through their brands, Infraly delivers cutting-edge solutions across multiple markets. Their vertically integrated approach provides unmatched performance, scalability, and reliability, giving our customers full control.                                                                                     |
-| [**MineStrator**](https://minestrator.com/)                                       | MineStrator is a game server hosting provider. Looking for the most high-end French hosting company for your Minecraft server? More than 24,000 members on our Discord trust us. Give us a try!                                                |
-| [**Physgun**](https://physgun.com/)                                               | Physgun is a game server hosting provider. Most providers rent rack space and rebrand a panel. At Physgun, they engineer the performance, write the features, and staff the support. Physgun truly is game hosting perfected!                   |
-| [**WISP**](https://wisp.gg/)                                                      | WISP is an industry-leading SaaS platform for game server management, designed for hosting companies, gaming organizations, and enthusiasts. WISP combines modern, intuitive interfaces with powerful tools, making server deployment and administration seamless, scalable, and efficient.     
+Versions are `<upstream version>-cvx.<n>`, e.g. `1.13.4-cvx.1`.
 
-## Documentation
+1. Tag `main`: `git tag v1.13.4-cvx.1 && git push origin v1.13.4-cvx.1`.
+2. `corvex-release.yaml` tests and builds without secrets, then waits for approval on the
+   `agent-release` environment.
+3. After approval it signs each binary and `SHA256SUMS` with the Ed25519 key in the environment
+   secret `AGENT_SIGNING_KEY` and publishes a GitHub release with the binaries, `SHA256SUMS`,
+   the `.sig` files and the public key.
+4. In Corvex, add the version and both SHA-256 values to `config/corvex.php` →
+   `daemons.agent.releases`. The node bootstrap checks the SHA-256 and the signature against the
+   public key built into the script.
 
-* [Panel Documentation](https://docs.pterodactyl.io/v1/panel/getting-started)
-* [Wings Documentation](https://docs.pterodactyl.io/v1/wings/)
-* [Community Guides](https://docs.pterodactyl.io/v1/guides/panel-installation/debian)
-* Or, get additional help [via Discord](https://discord.gg/pterodactyl)
+Signing key (once, by the founder, offline):
 
-## Reporting Issues
+```
+openssl genpkey -algorithm ed25519 -out corvex-agent-signing.key
+openssl pkey -in corvex-agent-signing.key -pubout -out corvex-agent-signing.pub
+```
 
-Please use the [pterodactyl/panel](https://github.com/pterodactyl/panel) repository to report any issues or make
-feature requests for Wings. In addition, the [security policy](https://github.com/pterodactyl/panel/security/policy) listed
-within that repository also applies to Wings.
+Store the private key as `AGENT_SIGNING_KEY` in the `agent-release` environment (Settings →
+Environments: required reviewers, and deployment tags limited to `v*-cvx.*`) and keep an offline
+backup. The public key goes into
+Corvex's `resources/scripts/node-bootstrap.sh`. The release key is separate from every other key.
+
+## Upstream merges
+
+`corvex-upstream.yaml` runs every Monday (or by hand). When Pterodactyl tags a new Wings release
+it merges the tag and runs the Go tests in a job with read-only access, then a second job (which runs
+no project code) pushes `upstream/<tag>`, opens a pull request and starts Corvex CI on it.
+
+1. Resolve conflicts on that branch, keeping every change in `BRANDING.md` and nothing more.
+2. Run the Corvex contract suite against a build of the branch (`tests/Contract` in Corvex).
+3. Merge, update `BRANDING.md` if line numbers moved, and release `<tag>-cvx.1`.
+
+Security releases: merged and released within 72 hours.
+
+The workflow needs "Allow GitHub Actions to create and approve pull requests" in the repository
+settings. Pull requests opened with the workflow token do not start `pull_request` workflows, so the
+workflow starts Corvex CI with `workflow_dispatch` instead.

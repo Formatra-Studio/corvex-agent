@@ -1,0 +1,9 @@
+Corvex Agent
+Copyright (c) 2026 Formatra Studio
+
+Corvex Agent is based on Pterodactyl Wings (MIT), https://github.com/pterodactyl/wings
+Copyright (c) 2018 - 2021 Dane Everitt <dane@daneeveritt.com> and Contributors
+
+The full MIT license text is in LICENSE and applies to this whole repository. The changes Corvex
+made to the upstream code are listed in BRANDING.md. "Pterodactyl" and "Wings" are the names of
+the upstream project; Corvex Agent is not affiliated with or endorsed by it.
