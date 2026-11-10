@@ -35,6 +35,9 @@ func TestAgentFieldsAreAdditive(t *testing.T) {
 			t.Errorf("field %q changed: %s -> %s", k, want, got)
 		}
 	}
+	if _, ok := b["layout"]; !ok {
+		t.Errorf("layout missing: %s", after)
+	}
 	if b["daemon"] != "corvex-agent" || b["agent_version"] != "1.13.4-cvx.1" {
 		t.Errorf("agent fields missing: %s", after)
 	}

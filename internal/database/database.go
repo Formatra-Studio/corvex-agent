@@ -25,7 +25,7 @@ func Initialize() error {
 	if !o.SwapIf(true) {
 		panic("database: attempt to initialize more than once during application lifecycle")
 	}
-	p := filepath.Join(config.Get().System.RootDirectory, "wings.db")
+	p := filepath.Join(config.Get().System.RootDirectory, config.Get().DatabaseFileName())
 	instance, err := gorm.Open(sqlite.Open(p), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})

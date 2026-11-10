@@ -2,7 +2,8 @@ name: Corvex release
 
 # Tag v<upstream version>-cvx.<n> (e.g. v1.13.4-cvx.1) on main to release. The build job has no
 # secrets. The sign job waits for a reviewer on the "agent-release" environment, which alone holds
-# the Ed25519 signing key (AGENT_SIGNING_KEY, a PEM private key). Corvex's node bootstrap checks
+# the Ed25519 signing key (AGENT_SIGNING_KEY, a PEM private key). Restrict that environment to tags
+# matching v*-cvx.* (deployment tag policy) as well as requiring a reviewer. Corvex's node bootstrap checks
 # both the SHA-256 and the signature before it installs a binary.
 
 on:
@@ -20,7 +21,11 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
+          # A release never reuses caches written by other workflow runs.
+          cache: false
       - run: go test ./...
+      # Shows the build is deterministic on this runner; an independent rebuild elsewhere is what proves
+      # reproducibility (README: Release).
       - name: Build twice and compare
         run: |
           version="${GITHUB_REF_NAME#v}"

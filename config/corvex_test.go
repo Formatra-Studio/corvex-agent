@@ -35,19 +35,24 @@ func TestNewInstallsUseAgentDefaults(t *testing.T) {
 	if c.UsesLegacyDefaults() {
 		t.Fatal("the agent location must not use legacy defaults")
 	}
-	want := map[string]string{
-		c.System.RootDirectory:    "/var/lib/corvex-agent",
-		c.System.LogDirectory:     "/var/log/corvex-agent",
-		c.System.Data:             "/var/lib/corvex-agent/volumes",
-		c.System.ArchiveDirectory: "/var/lib/corvex-agent/archives",
-		c.System.BackupDirectory:  "/var/lib/corvex-agent/backups",
-		c.System.TmpDirectory:     "/tmp/corvex-agent",
-		c.Docker.Network.Name:     "corvex_nw",
-		c.Docker.Network.Mode:     "corvex_nw",
+	checks := [][2]string{
+		{c.System.RootDirectory, "/var/lib/corvex-agent"},
+		{c.System.LogDirectory, "/var/log/corvex-agent"},
+		{c.System.Data, "/var/lib/corvex-agent/volumes"},
+		{c.System.ArchiveDirectory, "/var/lib/corvex-agent/archives"},
+		{c.System.BackupDirectory, "/var/lib/corvex-agent/backups"},
+		{c.System.TmpDirectory, "/tmp/corvex-agent"},
+		{c.Docker.Network.Name, "corvex_nw"},
+		{c.Docker.Network.Mode, "corvex_nw"},
+		{c.LayoutName(), "corvex"},
+		{c.System.Username, "corvex"},
+		{c.System.Passwd.Directory, "/run/corvex-agent/etc"},
+		{c.System.MachineID.Directory, "/run/corvex-agent/machine-id"},
+		{c.DatabaseFileName(), "corvex-agent.db"},
 	}
-	for got, expected := range want {
-		if got != expected {
-			t.Errorf("got %q, want %q", got, expected)
+	for _, pair := range checks {
+		if pair[0] != pair[1] {
+			t.Errorf("got %q, want %q", pair[0], pair[1])
 		}
 	}
 	if DockerBridgeName(c.Docker.Network.Name) != "corvex0" {
@@ -70,6 +75,11 @@ func TestMigratedNodesKeepWingsDefaults(t *testing.T) {
 		{c.Docker.Network.Name, "pterodactyl_nw"},
 		{c.Docker.Network.Mode, "pterodactyl_nw"},
 		{DockerBridgeName(c.Docker.Network.Name), "pterodactyl0"},
+		{c.LayoutName(), "pterodactyl"},
+		{c.System.Username, "pterodactyl"},
+		{c.System.Passwd.Directory, "/run/wings/etc"},
+		{c.System.MachineID.Directory, "/run/wings/machine-id"},
+		{c.DatabaseFileName(), "wings.db"},
 	}
 	for _, pair := range checks {
 		if pair[0] != pair[1] {
@@ -88,5 +98,12 @@ func TestValuesInTheFileStillWin(t *testing.T) {
 	}
 	if c.System.RootDirectory != "/var/lib/pterodactyl" {
 		t.Errorf("root = %q", c.System.RootDirectory)
+	}
+}
+
+func TestLegacyLocationIsMatchedAfterCleaning(t *testing.T) {
+	c := loadAt(t, "/etc/pterodactyl//config.yml", "")
+	if !c.UsesLegacyDefaults() || c.System.RootDirectory != "/var/lib/pterodactyl" {
+		t.Fatalf("a non-canonical spelling of the Wings path must keep the Wings defaults, root = %q", c.System.RootDirectory)
 	}
 }

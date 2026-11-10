@@ -8,7 +8,10 @@ package config
 // that file, every default stays the upstream one, so a key missing from the file never moves
 // data, logs or the Docker network somewhere new.
 
-import "os"
+import (
+	"os"
+	"path/filepath"
+)
 
 // LegacyLocation is where Pterodactyl Wings keeps its configuration file.
 const LegacyLocation = "/etc/pterodactyl/config.yml"
@@ -26,7 +29,16 @@ func DefaultConfigLocation() string {
 
 // UsesLegacyDefaults reports whether this configuration was read from the Wings location.
 func (c *Configuration) UsesLegacyDefaults() bool {
-	return c.path == LegacyLocation
+	return c.path != "" && filepath.Clean(c.path) == LegacyLocation
+}
+
+// LayoutName tells a panel where this node keeps its configuration and state: "pterodactyl" for a
+// node switched from Wings, "corvex" for an agent install. Reported as `layout` in GET /api/system.
+func (c *Configuration) LayoutName() string {
+	if c.UsesLegacyDefaults() {
+		return "pterodactyl"
+	}
+	return "corvex"
 }
 
 // applyLegacyDefaults puts back the upstream defaults for every value the agent changed.
@@ -40,6 +52,18 @@ func applyLegacyDefaults(c *Configuration) {
 	c.System.TmpDirectory = "/tmp/pterodactyl"
 	c.Docker.Network.Name = "pterodactyl_nw"
 	c.Docker.Network.Mode = "pterodactyl_nw"
+	c.System.Username = "pterodactyl"
+	c.System.Passwd.Directory = "/run/wings/etc"
+	c.System.MachineID.Directory = "/run/wings/machine-id"
+}
+
+// DatabaseFileName is the daemon's state database inside the root directory: the Wings name on a
+// node switched from Wings, so its state carries over.
+func (c *Configuration) DatabaseFileName() string {
+	if c.UsesLegacyDefaults() {
+		return "wings.db"
+	}
+	return "corvex-agent.db"
 }
 
 // DockerBridgeName is the host interface name used when the agent creates its Docker network.

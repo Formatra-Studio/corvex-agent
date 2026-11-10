@@ -24,11 +24,13 @@ func getSystemInformation(c *gin.Context) {
 		return
 	}
 
+	agent := system.CurrentAgentInformation()
+	agent.Layout = config.Get().LayoutName()
 	if c.Query("v") == "2" {
 		c.JSON(http.StatusOK, struct {
 			*system.Information
 			system.AgentInformation
-		}{i, system.CurrentAgentInformation()})
+		}{i, agent})
 		return
 	}
 
@@ -45,7 +47,7 @@ func getSystemInformation(c *gin.Context) {
 		KernelVersion:    i.System.KernelVersion,
 		OS:               i.System.OSType,
 		Version:          i.Version,
-		AgentInformation: system.CurrentAgentInformation(),
+		AgentInformation: agent,
 	})
 }
 

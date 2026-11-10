@@ -156,7 +156,7 @@ type SystemConfiguration struct {
 	TmpDirectory string `default:"/tmp/corvex-agent" json:"-" yaml:"tmp_directory"`
 
 	// The user that should own all of the server files, and be used for containers.
-	Username string `default:"pterodactyl" yaml:"username"`
+	Username string `default:"corvex" yaml:"username"`
 
 	// The timezone for this Wings instance. This is detected by Wings automatically if possible,
 	// and falls back to UTC if not able to be detected. If you need to set this manually, that
@@ -202,7 +202,7 @@ type SystemConfiguration struct {
 		// into the Wings container as the exact path on the host, which should match the value
 		// specified here. If you are using SELinux, you will need to make sure this file has the
 		// correct SELinux context in order for containers to use it.
-		Directory string `yaml:"directory" default:"/run/wings/etc"`
+		Directory string `yaml:"directory" default:"/run/corvex-agent/etc"`
 	} `yaml:"passwd"`
 
 	// MachineID controls the mounting of a generated `/etc/machine-id` file into containers started by Wings.
@@ -222,7 +222,7 @@ type SystemConfiguration struct {
 		// into the Wings container as the exact path on the host, which should match the value
 		// specified here. If you are using SELinux, you will need to make sure this file has the
 		// correct SELinux context in order for containers to use it.
-		Directory string `yaml:"directory" default:"/run/wings/machine-id"`
+		Directory string `yaml:"directory" default:"/run/corvex-agent/machine-id"`
 	} `yaml:"machine_id"`
 
 	// The amount of time in seconds that can elapse before a server's disk space calculation is
@@ -610,7 +610,7 @@ func EnsurePterodactylUser() error {
 
 	// Our way of detecting if wings is running inside of Docker.
 	if sysName == "distroless" {
-		_config.System.Username = system.FirstNotEmpty(os.Getenv("WINGS_USERNAME"), "pterodactyl")
+		_config.System.Username = system.FirstNotEmpty(os.Getenv("WINGS_USERNAME"), _config.System.Username)
 		_config.System.User.Uid = system.MustInt(system.FirstNotEmpty(os.Getenv("WINGS_UID"), "988"))
 		_config.System.User.Gid = system.MustInt(system.FirstNotEmpty(os.Getenv("WINGS_GID"), "988"))
 		return nil
@@ -628,7 +628,7 @@ func EnsurePterodactylUser() error {
 		return nil
 	}
 
-	log.WithField("username", _config.System.Username).Info("checking for pterodactyl system user")
+	log.WithField("username", _config.System.Username).Info("checking for the system user")
 	u, err := user.Lookup(_config.System.Username)
 	// If an error is returned but it isn't the unknown user error just abort
 	// the process entirely. If we did find a user, return it immediately.
@@ -805,7 +805,7 @@ func ConfigureDirectories() error {
 // This function IS NOT thread-safe.
 func EnableLogRotation() error {
 	if !_config.System.EnableLogRotate {
-		log.Info("skipping log rotate configuration, disabled in wings config file")
+		log.Info("skipping log rotate configuration, disabled in the config file")
 		return nil
 	}
 

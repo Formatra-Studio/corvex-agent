@@ -19,6 +19,8 @@ type AgentInformation struct {
 	Daemon       string   `json:"daemon"`
 	AgentVersion string   `json:"agent_version"`
 	Features     []string `json:"features"`
+	// Layout is "pterodactyl" or "corvex" (see config.LayoutName); filled in by the router.
+	Layout string `json:"layout"`
 }
 
 // CurrentAgentInformation describes this build.

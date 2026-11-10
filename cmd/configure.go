@@ -33,7 +33,7 @@ var nodeIdRegex = regexp.MustCompile(`^(\d+)$`)
 
 var configureCmd = &cobra.Command{
 	Use:   "configure",
-	Short: "Use a token to configure wings automatically",
+	Short: "Use a token to configure the daemon automatically (Pterodactyl panels; Corvex nodes use the bootstrap)",
 	Run:   configureCmdRun,
 }
 
@@ -158,11 +158,11 @@ func configureCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	if err := writePanelConfiguration(target, configureArgs.PanelURL, b); err != nil {
-		fmt.Println("Failed to configure wings.\n", err.Error())
+		fmt.Println("Failed to configure corvex-agent.\n", err.Error())
 		os.Exit(1)
 	}
 
-	fmt.Println("Successfully configured wings.")
+	fmt.Println("Successfully configured corvex-agent.")
 }
 
 // maxConfigurationResponseSize is the largest node configuration that is read

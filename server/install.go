@@ -434,7 +434,7 @@ func (ip *InstallationProcess) Execute() (string, error) {
 		Image:        ip.Script.ContainerImage,
 		Env:          ip.Server.GetEnvironmentVariables(),
 		Labels: map[string]string{
-			"Service":       "Pterodactyl",
+			"Service":       "Corvex",
 			"ContainerType": "server_installer",
 		},
 	}

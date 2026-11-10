@@ -12,7 +12,7 @@ purpose: renaming it would touch every import in every file.
 
 | File | Purpose |
 |---|---|
-| `NOTICE`, `BRANDING.md`, `README.md` (rewritten) | Attribution, this list, Corvex build and release notes |
+| `NOTICE`, `THIRD_PARTY_NOTICES.md`, `BRANDING.md`, `README.md` (rewritten) | Attribution, this list, Corvex build and release notes |
 | `config/corvex.go`, `config/corvex_test.go` | Agent default paths; Wings defaults for configs read from `/etc/pterodactyl/config.yml` |
 | `system/corvex.go`, `system/corvex_test.go` | `daemon`, `agent_version`, `features` for `GET /api/system` |
 | `packaging/corvex-agent.service` | systemd unit `corvex-agent.service` |
@@ -33,7 +33,13 @@ purpose: renaming it would touch every import in every file.
 |---|---|---|---|
 | `config/config.go` | 31 | `DefaultLocation` = `/etc/corvex-agent/config.yml` | Default config location |
 | `config/config.go` | 140-156 | Default root, log, data, archive, backup and tmp paths under `corvex-agent` | New installs only (see `config/corvex.go`) |
+| `config/config.go` | 159, 205, 225 | Default system user `corvex`; passwd and machine-id files under `/run/corvex-agent` | New installs only (Wings values for a config in the Wings location) |
 | `config/config.go` | 350 | Default `app_name` = `Corvex` | Console prefix `[Corvex Daemon]:` |
+| `config/config.go` | ~613, ~631, ~808 | Container-mode username falls back to the configured one; log texts without "pterodactyl"/"wings" | Branding |
+| `internal/database/database.go` | 28 | State database `corvex-agent.db` (`wings.db` on a node switched from Wings) | New installs only |
+| `environment/docker/container.go`, `server/install.go` | 238, 437 | Container label `Service=Corvex` | Nothing filters on it; only new containers get it |
+| `server/backup.go` | 29 | Log text | Branding |
+| `cmd/configure.go` | 36, 161, 165 | Texts of the `configure` command | Branding |
 | `config/config.go` | 466-468 | `NewAtPath` applies Wings defaults for `/etc/pterodactyl/config.yml` | Migrated nodes never move data or network |
 | `config/config.go` | 817-840 | Log rotation file `/etc/logrotate.d/corvex-agent`, `corvex-agent.log`, `corvex-agent.service` | Log name and unit name |
 | `config/config_docker.go` | 37, 40 | Default network `corvex_nw` | New installs only |
@@ -46,7 +52,7 @@ purpose: renaming it would touch every import in every file.
 | `cmd/diagnostics.go` | 51-155 | Report title, versions, headers, log file | Diagnostics report |
 | `remote/http.go` | 128 | User-Agent `Corvex Agent/v<agent> (id:…)` | User agent (the `Accept` header is protocol and stays) |
 | `router/downloader/downloader.go` | 26, 214 | User-Agent `Corvex Agent/v<agent>` for remote file pulls | User agent |
-| `router/router_system.go` | 28-48 | Both `/api/system` forms gain `daemon`, `agent_version`, `features` | Additive detection fields |
+| `router/router_system.go` | 28-50 | Both `/api/system` forms gain `daemon`, `agent_version`, `features`, `layout` (`pterodactyl` when the config was read from the Wings location, else `corvex`) | Additive detection fields |
 | `sftp/server.go` | 205 | SSH version string `SSH-2.0-CorvexAgent` | SFTP identification |
 | `server/install.go` | 383 | Install log header `Server Installation Log` | Customer-visible text |
 | `server/mounts.go` | 143 | "check the node daemon logs" | Customer-visible text |
@@ -56,8 +62,10 @@ purpose: renaming it would touch every import in every file.
 
 - `system.Version` stays the upstream version (`1.13.4`): panels compare it against the Wings
   versions they support. The agent release is `agent_version` (`1.13.4-cvx.1`).
-- `Accept: application/vnd.pterodactyl.v1+json`, backup adapter name `wings`, container label
-  `Service=Pterodactyl`, the `pterodactyl` system user, `/run/wings/*` runtime paths, `wings.db`
-  and the `WINGS_*` environment variables: they are protocol, data or state an existing node
-  depends on.
-- The `configure` command (talks to a Pterodactyl panel API; Corvex nodes use the bootstrap).
+- Protocol and compatibility names, invisible on a node: `Accept: application/vnd.pterodactyl.v1+json`
+  (remote API), the backup adapter name `wings` (payloads), the Go module path, and the `WINGS_*`
+  environment variables operators may already use.
+- On a node switched from Wings (config in `/etc/pterodactyl`): its paths, `pterodactyl` user,
+  `pterodactyl_nw` network, `/run/wings` files and `wings.db` stay, so no server, file, backup or
+  connection moves. New installs have none of these names.
+- The `configure` command itself (talks to a Pterodactyl panel API; Corvex nodes use the bootstrap).
