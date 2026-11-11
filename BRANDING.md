@@ -16,8 +16,11 @@ purpose: renaming it would touch every import in every file.
 | `config/corvex.go`, `config/corvex_test.go` | Agent default paths; Wings defaults for configs read from `/etc/pterodactyl/config.yml` |
 | `system/corvex.go`, `system/corvex_test.go` | `daemon`, `agent_version`, `features` for `GET /api/system` |
 | `packaging/corvex-agent.service` | systemd unit `corvex-agent.service` |
-| `scripts/build-release.sh` | Reproducible release build (`CGO_ENABLED=0`, `-trimpath`, `-buildid=`) |
-| `.github/workflows/corvex-ci.yaml`, `corvex-release.yaml`, `corvex-upstream.yaml` | CI, signed releases, weekly upstream merge |
+| `scripts/build-release.sh` | Reproducible release build (`CGO_ENABLED=0`, `-trimpath`, `-buildid=`): bare binaries plus `.tar.gz` archives with the license files |
+| `scripts/update-licenses.sh`, `third_party/` | Generates `THIRD_PARTY_NOTICES.md`, `third_party/licenses/` (license and NOTICE files of every Go module in the binary) and `third_party/source-modules.txt` with go-licenses |
+| `scripts/check-release.sh` | Checks a release: checksums, license files and source zips in every archive |
+| `corvex_legal.go`, `corvex_legal_test.go`, `cmd/license.go`, `cmd/license_test.go` | Embeds the license texts; `corvex-agent license [--all]` prints them. A local command only: no route, payload or config changes |
+| `.github/workflows/corvex-ci.yaml`, `corvex-release.yaml`, `corvex-upstream.yaml` | CI (incl. third-party notices current, release carries the license files), signed releases, weekly upstream merge |
 
 ## Removed files
 
