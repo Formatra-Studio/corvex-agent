@@ -183,5 +183,11 @@ else
     rm -rf third_party
     cp -r "$out/third_party" third_party
     cp "$out/THIRD_PARTY_NOTICES.md" THIRD_PARTY_NOTICES.md
+    # Every generated file must be committable; a .gitignore pattern would drop it from the binary in CI.
+    if ignored="$(find third_party -type f | git check-ignore --stdin)"; then
+        echo "these generated files are ignored by .gitignore; add an exception:" >&2
+        echo "$ignored" >&2
+        exit 1
+    fi
     echo "wrote THIRD_PARTY_NOTICES.md and third_party/ ($(wc -l <"$work/modules") modules)"
 fi

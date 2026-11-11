@@ -34,6 +34,7 @@ purpose: renaming it would touch every import in every file.
 
 | File | Line(s) | Change | Reason |
 |---|---|---|---|
+| `.gitignore` | end | Re-includes `third_party/licenses/github.com/pterodactyl/wings/` (the upstream `wings` pattern would ignore it) | License files in the binary |
 | `config/config.go` | 31 | `DefaultLocation` = `/etc/corvex-agent/config.yml` | Default config location |
 | `config/config.go` | 140-156 | Default root, log, data, archive, backup and tmp paths under `corvex-agent` | New installs only (see `config/corvex.go`) |
 | `config/config.go` | 159, 205, 225 | Default system user `corvex`; passwd and machine-id files under `/run/corvex-agent` | New installs only (Wings values for a config in the Wings location) |
