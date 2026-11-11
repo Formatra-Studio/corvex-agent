@@ -26,13 +26,13 @@ The Go standard library and runtime (toolchain `go1.26.9`), BSD-3-Clause:
 ## Licenses with source obligations
 
 - `github.com/hashicorp/golang-lru/v2` v2.0.7 (BSD-3-Clause, MPL-2.0), unmodified.
-  Source: `third_party/sources/github.com/hashicorp/golang-lru/v2@v2.0.7.zip` in every release archive, identical to
-  https://proxy.golang.org/github.com/hashicorp/golang-lru/v2/@v/v2.0.7.zip (checksum in `go.sum`).
+  Source: `third_party/sources/github.com/hashicorp/golang-lru/v2@v2.0.7.zip` in every release archive, the module zip that
+  `go.sum` pins, as served by https://proxy.golang.org/github.com/hashicorp/golang-lru/v2/@v/v2.0.7.zip.
 - `github.com/juju/ratelimit` v1.0.2 (LGPL-3.0), unmodified.
-  Source: `third_party/sources/github.com/juju/ratelimit@v1.0.2.zip` in every release archive, identical to
-  https://proxy.golang.org/github.com/juju/ratelimit/@v/v1.0.2.zip (checksum in `go.sum`).
+  Source: `third_party/sources/github.com/juju/ratelimit@v1.0.2.zip` in every release archive, the module zip that
+  `go.sum` pins, as served by https://proxy.golang.org/github.com/juju/ratelimit/@v/v1.0.2.zip.
   Linked statically under the static-linking exception in its LICENSE; LGPL-3.0 builds on GPL-3.0,
-  whose text is in `third_party/licenses/github.com/juju/ratelimit/GPL-3.0.txt`.
+  whose text is in `third_party/licenses/github.com/juju/ratelimit/GPL-3.0.txt`. The startup banner names it.
 
 ## Apache-2.0 NOTICE files
 
@@ -44,9 +44,13 @@ Carried unchanged, as Apache-2.0 section 4(d) requires:
 
 ## Go modules
 
+"License" is the go-licenses classification. The last column lists every license, copyright, notice,
+copying and patents file shipped for the module, also those the classification does not name (for
+example the MIT notice of musl in `modernc.org/libc` `COPYRIGHT-MUSL`).
+
 | Module | Version | License | License and notice files |
 |---|---|---|---|
-| `emperror.dev/errors` | v0.8.1 | MIT | `third_party/licenses/emperror.dev/errors/LICENSE` |
+| `emperror.dev/errors` | v0.8.1 | MIT | `third_party/licenses/emperror.dev/errors/LICENSE`<br>`third_party/licenses/emperror.dev/errors/LICENSE_THIRD_PARTY` |
 | `github.com/AlecAivazis/survey/v2` | v2.3.7 | MIT | `third_party/licenses/github.com/AlecAivazis/survey/v2/LICENSE`<br>`third_party/licenses/github.com/AlecAivazis/survey/v2/terminal/LICENSE.txt` |
 | `github.com/Jeffail/gabs/v2` | v2.7.0 | MIT | `third_party/licenses/github.com/Jeffail/gabs/v2/LICENSE` |
 | `github.com/NYTimes/logrotate` | v1.0.0 | Apache-2.0 | `third_party/licenses/github.com/NYTimes/logrotate/LICENSE` |
@@ -80,7 +84,7 @@ Carried unchanged, as Apache-2.0 section 4(d) requires:
 | `github.com/gbrlsnchs/jwt/v3` | v3.0.1 | MIT | `third_party/licenses/github.com/gbrlsnchs/jwt/v3/LICENSE` |
 | `github.com/gin-contrib/sse` | v1.0.0 | MIT | `third_party/licenses/github.com/gin-contrib/sse/LICENSE` |
 | `github.com/gin-gonic/gin` | v1.10.1 | MIT | `third_party/licenses/github.com/gin-gonic/gin/LICENSE` |
-| `github.com/glebarez/go-sqlite` | v1.22.0 | BSD-3-Clause | `third_party/licenses/github.com/glebarez/go-sqlite/LICENSE` |
+| `github.com/glebarez/go-sqlite` | v1.22.0 | BSD-3-Clause | `third_party/licenses/github.com/glebarez/go-sqlite/LICENSE`<br>`third_party/licenses/github.com/glebarez/go-sqlite/SQLITE-LICENSE` |
 | `github.com/glebarez/sqlite` | v1.11.0 | MIT | `third_party/licenses/github.com/glebarez/sqlite/License` |
 | `github.com/go-co-op/gocron` | v1.37.0 | MIT | `third_party/licenses/github.com/go-co-op/gocron/LICENSE` |
 | `github.com/go-logr/logr` | v1.4.4 | Apache-2.0 | `third_party/licenses/github.com/go-logr/logr/LICENSE` |
@@ -98,7 +102,7 @@ Carried unchanged, as Apache-2.0 section 4(d) requires:
 | `github.com/juju/ratelimit` | v1.0.2 | LGPL-3.0 | `third_party/licenses/github.com/juju/ratelimit/GPL-3.0.txt`<br>`third_party/licenses/github.com/juju/ratelimit/LICENSE` |
 | `github.com/kballard/go-shellquote` | v0.0.0-20180428030007-95032a82bc51 | MIT | `third_party/licenses/github.com/kballard/go-shellquote/LICENSE` |
 | `github.com/klauspost/compress` | v1.18.7 | Apache-2.0, BSD-3-Clause, MIT | `third_party/licenses/github.com/klauspost/compress/LICENSE`<br>`third_party/licenses/github.com/klauspost/compress/internal/snapref/LICENSE`<br>`third_party/licenses/github.com/klauspost/compress/s2/LICENSE`<br>`third_party/licenses/github.com/klauspost/compress/zstd/internal/xxhash/LICENSE.txt` |
-| `github.com/klauspost/pgzip` | v1.2.6 | MIT | `third_party/licenses/github.com/klauspost/pgzip/LICENSE` |
+| `github.com/klauspost/pgzip` | v1.2.6 | MIT | `third_party/licenses/github.com/klauspost/pgzip/GO_LICENSE`<br>`third_party/licenses/github.com/klauspost/pgzip/LICENSE` |
 | `github.com/kr/fs` | v0.1.0 | BSD-3-Clause | `third_party/licenses/github.com/kr/fs/LICENSE` |
 | `github.com/leodido/go-urn` | v1.4.0 | MIT | `third_party/licenses/github.com/leodido/go-urn/LICENSE` |
 | `github.com/magiconair/properties` | v1.8.9 | BSD-2-Clause | `third_party/licenses/github.com/magiconair/properties/LICENSE.md` |
@@ -109,10 +113,10 @@ Carried unchanged, as Apache-2.0 section 4(d) requires:
 | `github.com/mikelolasagasti/xz` | v1.0.1 | BSD-0-Clause | `third_party/licenses/github.com/mikelolasagasti/xz/LICENSE` |
 | `github.com/minio/minlz` | v1.0.1 | Apache-2.0 | `third_party/licenses/github.com/minio/minlz/LICENSE` |
 | `github.com/mitchellh/colorstring` | v0.0.0-20190213212951-d06e56a500db | MIT | `third_party/licenses/github.com/mitchellh/colorstring/LICENSE` |
-| `github.com/moby/docker-image-spec` | v1.3.1 | Apache-2.0 | `third_party/licenses/github.com/moby/docker-image-spec/specs-go/v1/LICENSE` |
+| `github.com/moby/docker-image-spec` | v1.3.1 | Apache-2.0 | `third_party/licenses/github.com/moby/docker-image-spec/LICENSE` |
 | `github.com/nwaples/rardecode/v2` | v2.2.0 | BSD-2-Clause | `third_party/licenses/github.com/nwaples/rardecode/v2/LICENSE` |
-| `github.com/opencontainers/go-digest` | v1.0.0 | Apache-2.0 | `third_party/licenses/github.com/opencontainers/go-digest/LICENSE` |
-| `github.com/opencontainers/image-spec` | v1.1.1 | Apache-2.0 | `third_party/licenses/github.com/opencontainers/image-spec/specs-go/LICENSE` |
+| `github.com/opencontainers/go-digest` | v1.0.0 | Apache-2.0 | `third_party/licenses/github.com/opencontainers/go-digest/LICENSE`<br>`third_party/licenses/github.com/opencontainers/go-digest/LICENSE.docs` |
+| `github.com/opencontainers/image-spec` | v1.1.1 | Apache-2.0 | `third_party/licenses/github.com/opencontainers/image-spec/LICENSE` |
 | `github.com/patrickmn/go-cache` | v2.1.0+incompatible | MIT | `third_party/licenses/github.com/patrickmn/go-cache/LICENSE` |
 | `github.com/pelletier/go-toml/v2` | v2.2.3 | MIT | `third_party/licenses/github.com/pelletier/go-toml/v2/LICENSE` |
 | `github.com/pierrec/lz4/v4` | v4.1.22 | BSD-3-Clause | `third_party/licenses/github.com/pierrec/lz4/v4/LICENSE` |
@@ -122,7 +126,7 @@ Carried unchanged, as Apache-2.0 section 4(d) requires:
 | `github.com/robfig/cron/v3` | v3.0.1 | MIT | `third_party/licenses/github.com/robfig/cron/v3/LICENSE` |
 | `github.com/sabhiram/go-gitignore` | v0.0.0-20210923224102-525f6e181f06 | MIT | `third_party/licenses/github.com/sabhiram/go-gitignore/LICENSE` |
 | `github.com/sirupsen/logrus` | v1.9.3 | MIT | `third_party/licenses/github.com/sirupsen/logrus/LICENSE` |
-| `github.com/sorairolake/lzip-go` | v0.3.8 | Apache-2.0 | `third_party/licenses/github.com/sorairolake/lzip-go/LICENSE-APACHE` |
+| `github.com/sorairolake/lzip-go` | v0.3.8 | Apache-2.0 | `third_party/licenses/github.com/sorairolake/lzip-go/LICENSE-APACHE`<br>`third_party/licenses/github.com/sorairolake/lzip-go/LICENSE-MIT`<br>`third_party/licenses/github.com/sorairolake/lzip-go/go.sum.license` |
 | `github.com/spf13/afero` | v1.15.0 | Apache-2.0 | `third_party/licenses/github.com/spf13/afero/LICENSE.txt` |
 | `github.com/spf13/cobra` | v1.10.2 | Apache-2.0 | `third_party/licenses/github.com/spf13/cobra/LICENSE.txt` |
 | `github.com/spf13/pflag` | v1.0.9 | BSD-3-Clause | `third_party/licenses/github.com/spf13/pflag/LICENSE` |
@@ -136,21 +140,21 @@ Carried unchanged, as Apache-2.0 section 4(d) requires:
 | `go.opentelemetry.io/otel/trace` | v1.47.0 | Apache-2.0, BSD-3-Clause | `third_party/licenses/go.opentelemetry.io/otel/trace/LICENSE` |
 | `go.uber.org/atomic` | v1.11.0 | MIT | `third_party/licenses/go.uber.org/atomic/LICENSE.txt` |
 | `go.uber.org/multierr` | v1.11.0 | MIT | `third_party/licenses/go.uber.org/multierr/LICENSE.txt` |
-| `go4.org` | v0.0.0-20230225012048-214862532bf5 | Apache-2.0 | `third_party/licenses/go4.org/readerutil/LICENSE` |
-| `golang.org/x/crypto` | v0.58.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/crypto/LICENSE` |
-| `golang.org/x/exp` | v0.0.0-20250305212735-054e65f0b394 | BSD-3-Clause | `third_party/licenses/golang.org/x/exp/constraints/LICENSE` |
-| `golang.org/x/net` | v0.60.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/net/LICENSE` |
-| `golang.org/x/sync` | v0.24.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/sync/errgroup/LICENSE` |
-| `golang.org/x/sys` | v0.49.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/sys/LICENSE` |
-| `golang.org/x/term` | v0.47.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/term/LICENSE` |
-| `golang.org/x/text` | v0.43.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/text/LICENSE` |
-| `golang.org/x/time` | v0.16.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/time/rate/LICENSE` |
-| `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | `third_party/licenses/google.golang.org/protobuf/LICENSE` |
+| `go4.org` | v0.0.0-20230225012048-214862532bf5 | Apache-2.0 | `third_party/licenses/go4.org/LICENSE` |
+| `golang.org/x/crypto` | v0.58.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/crypto/LICENSE`<br>`third_party/licenses/golang.org/x/crypto/PATENTS` |
+| `golang.org/x/exp` | v0.0.0-20250305212735-054e65f0b394 | BSD-3-Clause | `third_party/licenses/golang.org/x/exp/LICENSE`<br>`third_party/licenses/golang.org/x/exp/PATENTS` |
+| `golang.org/x/net` | v0.60.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/net/LICENSE`<br>`third_party/licenses/golang.org/x/net/PATENTS` |
+| `golang.org/x/sync` | v0.24.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/sync/LICENSE`<br>`third_party/licenses/golang.org/x/sync/PATENTS` |
+| `golang.org/x/sys` | v0.49.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/sys/LICENSE`<br>`third_party/licenses/golang.org/x/sys/PATENTS` |
+| `golang.org/x/term` | v0.47.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/term/LICENSE`<br>`third_party/licenses/golang.org/x/term/PATENTS` |
+| `golang.org/x/text` | v0.43.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/text/LICENSE`<br>`third_party/licenses/golang.org/x/text/PATENTS` |
+| `golang.org/x/time` | v0.16.0 | BSD-3-Clause | `third_party/licenses/golang.org/x/time/LICENSE`<br>`third_party/licenses/golang.org/x/time/PATENTS` |
+| `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | `third_party/licenses/google.golang.org/protobuf/LICENSE`<br>`third_party/licenses/google.golang.org/protobuf/PATENTS` |
 | `gopkg.in/ini.v1` | v1.67.0 | Apache-2.0 | `third_party/licenses/gopkg.in/ini.v1/LICENSE` |
-| `gopkg.in/yaml.v2` | v2.4.0 | Apache-2.0 | `third_party/licenses/gopkg.in/yaml.v2/LICENSE`<br>`third_party/licenses/gopkg.in/yaml.v2/NOTICE` |
+| `gopkg.in/yaml.v2` | v2.4.0 | Apache-2.0 | `third_party/licenses/gopkg.in/yaml.v2/LICENSE`<br>`third_party/licenses/gopkg.in/yaml.v2/LICENSE.libyaml`<br>`third_party/licenses/gopkg.in/yaml.v2/NOTICE` |
 | `gopkg.in/yaml.v3` | v3.0.1 | MIT | `third_party/licenses/gopkg.in/yaml.v3/LICENSE`<br>`third_party/licenses/gopkg.in/yaml.v3/NOTICE` |
 | `gorm.io/gorm` | v1.26.0 | MIT | `third_party/licenses/gorm.io/gorm/LICENSE` |
-| `modernc.org/libc` | v1.61.13 | BSD-3-Clause | `third_party/licenses/modernc.org/libc/LICENSE` |
+| `modernc.org/libc` | v1.61.13 | BSD-3-Clause | `third_party/licenses/modernc.org/libc/COPYRIGHT-MUSL`<br>`third_party/licenses/modernc.org/libc/LICENSE`<br>`third_party/licenses/modernc.org/libc/LICENSE-GO` |
 | `modernc.org/mathutil` | v1.7.1 | BSD-3-Clause | `third_party/licenses/modernc.org/mathutil/LICENSE` |
-| `modernc.org/memory` | v1.8.2 | BSD-3-Clause | `third_party/licenses/modernc.org/memory/LICENSE` |
-| `modernc.org/sqlite` | v1.36.0 | BSD-3-Clause | `third_party/licenses/modernc.org/sqlite/lib/LICENSE` |
+| `modernc.org/memory` | v1.8.2 | BSD-3-Clause | `third_party/licenses/modernc.org/memory/LICENSE`<br>`third_party/licenses/modernc.org/memory/LICENSE-GO`<br>`third_party/licenses/modernc.org/memory/LICENSE-MMAP-GO` |
+| `modernc.org/sqlite` | v1.36.0 | BSD-3-Clause | `third_party/licenses/modernc.org/sqlite/LICENSE`<br>`third_party/licenses/modernc.org/sqlite/SQLITE-LICENSE` |

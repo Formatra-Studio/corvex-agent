@@ -8,6 +8,7 @@
 #        scripts/update-licenses.sh --check   only compare (CI)
 # Needs go-licenses v2: go install github.com/google/go-licenses/v2@v2.0.1 (or set GO_LICENSES).
 set -euo pipefail
+export LC_ALL=C # sort order and character classes must not depend on the caller's locale
 
 cd "$(dirname "$0")/.."
 check=0
@@ -33,12 +34,14 @@ toolchain="${toolchain:-go$(awk '$1 == "go" { print $2 }' go.mod)}"
 export CGO_ENABLED=0 GOOS=linux
 for arch in amd64 arm64; do
     GOARCH="$arch" go list -deps -f '{{with .Module}}{{if not .Main}}{{.Path}} {{.Version}}{{end}}{{end}}' . >>"$work/modules.raw"
+    GOARCH="$arch" go list -deps -f '{{with .Module}}{{if not .Main}}{{.Path}} {{.Dir}}{{end}}{{end}}' . >>"$work/dirs.raw"
     GOARCH="$arch" "$golicenses" report . 2>"$work/report_$arch.log" >>"$work/report.raw" ||
         { cat "$work/report_$arch.log" >&2; exit 1; }
     GOARCH="$arch" "$golicenses" save . --save_path="$work/save_$arch" 2>"$work/save_$arch.log" ||
         { cat "$work/save_$arch.log" >&2; exit 1; }
 done
 sort -u "$work/modules.raw" >"$work/modules"
+sort -u "$work/dirs.raw" >"$work/dirs"
 sort -u "$work/report.raw" >"$work/report.csv"
 
 # Module of a package path or file path: the longest module path that is a prefix of it.
@@ -92,13 +95,44 @@ done | sort -u | while read -r f; do
 done
 install -m 0644 "$(go env GOROOT)/LICENSE" "$dest/go/LICENSE"
 
+# go-licenses saves the one license file it classifies per directory. Every other license, copyright,
+# notice, copying and patents file in a module's root ships too (e.g. modernc.org/libc COPYRIGHT-MUSL,
+# modernc.org/sqlite SQLITE-LICENSE, golang.org/x PATENTS); --check then fails when one is missing.
+while read -r mod dir; do
+    while read -r name; do
+        if [[ ! -f "$dest/$mod/$name" ]]; then
+            install -D -m 0644 "$dir/$name" "$dest/$mod/$name"
+        elif ! cmp -s "$dir/$name" "$dest/$mod/$name"; then
+            echo "$mod/$name differs from the module's own file" >&2
+            exit 1
+        fi
+    done < <(find "$dir" -maxdepth 1 -type f \( -iname '*licen[cs]e*' -o -iname '*copyright*' -o -iname 'notice*' \
+        -o -iname 'copying*' -o -iname 'patents*' \) ! -iname '*.go' -printf '%f\n' | sort)
+done <"$work/dirs"
+# go-licenses saves the license of a package directory (golang.org/x/sync/errgroup/LICENSE); a copy
+# identical to the same file in its module's root is redundant.
+(cd "$dest" && find . -type f ! -path './go/*' -printf '%P\n') | by_module | while read -r mod f; do
+    root="$mod/${f##*/}"
+    if [[ "$f" != "$root" && -f "$dest/$root" ]] && cmp -s "$dest/$f" "$dest/$root"; then
+        rm "$dest/$f"
+    fi
+done
+find "$dest" -type d -empty -delete
+
 # LGPL-3.0 is a set of additional permissions on top of GPL-3.0; both texts go with the binary.
+# The GPL-3.0 text comes from base-files (Debian, Ubuntu); the hash pins the FSF's verbatim text.
+gpl3=/usr/share/common-licenses/GPL-3
+gpl3_sha256=3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986
 awk '$2 == "LGPL-3.0" { print $1 }' "$work/licenses" | while read -r mod; do
     if ! grep -q 'links statically or dynamically' "$dest/$mod/LICENSE"; then
         echo "$mod: static-linking exception not found in its LICENSE" >&2
         exit 1
     fi
-    install -m 0644 /usr/share/common-licenses/GPL-3 "$dest/$mod/GPL-3.0.txt"
+    if [[ "$(sha256sum <"$gpl3" | cut -d' ' -f1)" != "$gpl3_sha256" ]]; then
+        echo "$gpl3 is missing or not the verbatim GPL-3.0 text" >&2
+        exit 1
+    fi
+    install -m 0644 "$gpl3" "$dest/$mod/GPL-3.0.txt"
 done
 
 (cd "$dest" && find . -type f ! -path './go/*' -printf '%P\n') | by_module | sort >"$work/files"
@@ -144,11 +178,11 @@ EOF
     while read -r mod ver; do
         lics="$(licenses_of "$mod")"
         printf -- '- `%s` %s (%s), unmodified.\n' "$mod" "$ver" "$lics"
-        printf '  Source: `third_party/sources/%s@%s.zip` in every release archive, identical to\n' "$mod" "$ver"
-        printf '  %s (checksum in `go.sum`).\n' "$(proxy_url "$mod" "$ver")"
+        printf '  Source: `third_party/sources/%s@%s.zip` in every release archive, the module zip that\n' "$mod" "$ver"
+        printf '  `go.sum` pins, as served by %s.\n' "$(proxy_url "$mod" "$ver")"
         if [[ "$lics" == *LGPL-3.0* ]]; then
             printf '  Linked statically under the static-linking exception in its LICENSE; LGPL-3.0 builds on GPL-3.0,\n'
-            printf '  whose text is in `third_party/licenses/%s/GPL-3.0.txt`.\n' "$mod"
+            printf '  whose text is in `third_party/licenses/%s/GPL-3.0.txt`. The startup banner names it.\n' "$mod"
         fi
     done <"$out/third_party/source-modules.txt"
     cat <<EOF
@@ -164,6 +198,10 @@ EOF
     cat <<EOF
 
 ## Go modules
+
+"License" is the go-licenses classification. The last column lists every license, copyright, notice,
+copying and patents file shipped for the module, also those the classification does not name (for
+example the MIT notice of musl in \`modernc.org/libc\` \`COPYRIGHT-MUSL\`).
 
 | Module | Version | License | License and notice files |
 |---|---|---|---|

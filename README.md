@@ -65,8 +65,9 @@ Versions are `<upstream version>-cvx.<n>`, e.g. `1.13.4-cvx.1`.
    `agent-release` environment.
 3. After approval it signs each binary, each archive and `SHA256SUMS` with the Ed25519 key in the
    environment secret `AGENT_SIGNING_KEY` and publishes a GitHub release with the binaries, the
-   `.tar.gz` archives, `SHA256SUMS`, the `.sig` files and the public key. The build job first checks
-   that the third-party notices are current and that every archive carries the license files.
+   `.tar.gz` archives, `SHA256SUMS`, the `.sig` files and the public key. Before that, a separate job
+   checks that the third-party notices are current and the build job checks that every archive
+   carries the license files.
 4. In Corvex, add the version and both SHA-256 values to `config/corvex.php` →
    `daemons.agent.releases`. The node bootstrap checks the SHA-256 and the signature against the
    public key built into the script.

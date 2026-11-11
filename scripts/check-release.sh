@@ -4,6 +4,7 @@
 # and the source zip of every module in third_party/source-modules.txt.
 # Usage: scripts/check-release.sh <agent version> <release dir>
 set -euo pipefail
+export LC_ALL=C # file lists and sort order must not depend on the caller's locale
 
 version="${1:?agent version required, e.g. 1.13.4-cvx.1}"
 dir="${2:?release dir required}"
@@ -22,6 +23,9 @@ expected=(corvex-agent_linux_amd64 corvex-agent_linux_arm64 corvex-agent_linux_a
 [[ "$(awk '{ print $2 }' "$dir/SHA256SUMS")" == "$(printf '%s\n' "${expected[@]}")" ]] ||
     fail "SHA256SUMS must list exactly: ${expected[*]}"
 (cd "$dir" && sha256sum --check --quiet SHA256SUMS) || fail "checksum mismatch"
+# The release job publishes everything in the directory.
+[[ "$(cd "$dir" && find . -mindepth 1 -printf '%P\n' | sort)" == "$(printf '%s\n' "${expected[@]}" SHA256SUMS | sort)" ]] ||
+    fail "$dir must hold exactly: ${expected[*]} SHA256SUMS"
 
 # The files each archive must hold, relative to its top directory.
 {
@@ -65,7 +69,7 @@ if [[ -n "$native" && "$(uname -s)" == "Linux" ]]; then
     bin="$dir/corvex-agent_linux_${native}"
     "$bin" license | grep -q 'Permission is hereby granted' || fail "$bin license: MIT text missing"
     "$bin" license --all >"$work/all.txt"
-    for f in THIRD_PARTY_NOTICES.md $(find third_party/licenses -type f | sort); do
+    { echo THIRD_PARTY_NOTICES.md; find third_party/licenses -type f | sort; } | while read -r f; do
         grep -qxF "==> $f <==" "$work/all.txt" || fail "$bin license --all: $f missing"
     done
     "$bin" version | grep -qF "corvex-agent v${version} " || fail "$bin version: expected v${version}"

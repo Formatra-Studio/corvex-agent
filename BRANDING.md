@@ -52,7 +52,7 @@ purpose: renaming it would touch every import in every file.
 | `cmd/root.go` | 50-57, 81, 87, 112, 114, 292 | Command name `corvex-agent`, help and log texts | Branding |
 | `cmd/root.go` | 69 | `version` prints `corvex-agent v<agent> (based on Pterodactyl Wings v<upstream>)` | `--version` |
 | `cmd/root.go` | 479-482 | Log file `corvex-agent.log` | Log name |
-| `cmd/root.go` | 492-519 | Startup banner and missing-config notice | Banner (MIT notice kept) |
+| `cmd/root.go` | 492-523 | Startup banner and missing-config notice; the banner also names the third-party components and the LGPL-3.0 module `github.com/juju/ratelimit` | Banner (MIT notice kept; LGPL-3.0 section 4(c)) |
 | `cmd/diagnostics.go` | 51-155 | Report title, versions, headers, log file | Diagnostics report |
 | `remote/http.go` | 128 | User-Agent `Corvex Agent/v<agent> (id:…)` | User agent (the `Accept` header is protocol and stays) |
 | `router/downloader/downloader.go` | 26, 214 | User-Agent `Corvex Agent/v<agent>` for remote file pulls | User agent |

@@ -9,6 +9,7 @@
 #   SHA256SUMS                               checksums of all four files
 # The license texts are also embedded in each binary (`corvex-agent license --all`).
 set -euo pipefail
+export LC_ALL=C # file lists and sort order must not depend on the caller's locale
 
 version="${1:?agent version required, e.g. 1.13.4-cvx.1}"
 out="${2:-dist}"
@@ -28,14 +29,15 @@ trap 'rm -rf "$stage"' EXIT
 epoch="${SOURCE_DATE_EPOCH:-$(git log -1 --format=%ct 2>/dev/null || echo 0)}"
 
 # What every archive carries next to the binary: the license files, and the source of each module
-# whose license (MPL-2.0, LGPL-3.0) asks for it to go with the binary, as the module zip go.sum pins.
+# whose license (MPL-2.0, LGPL-3.0) asks for it to go with the binary: the module zip go.sum pins.
 legal="$stage/legal"
 mkdir -p "$legal/third_party"
 cp LICENSE NOTICE THIRD_PARTY_NOTICES.md "$legal/"
 cp -r third_party/licenses "$legal/third_party/licenses"
 while read -r mod ver; do
     [[ -n "$mod" ]] || continue
-    zip="$(go mod download -json "${mod}@${ver}" | sed -n 's/^\t"Zip": "\(.*\)",$/\1/p')"
+    # The default proxy, so the zip is the one proxy.golang.org serves (THIRD_PARTY_NOTICES.md).
+    zip="$(GOPROXY=https://proxy.golang.org go mod download -json "${mod}@${ver}" | sed -n 's/^\t"Zip": "\(.*\)",$/\1/p')"
     if [[ ! -f "$zip" ]]; then
         echo "could not download the source of ${mod}@${ver}" >&2
         exit 1
