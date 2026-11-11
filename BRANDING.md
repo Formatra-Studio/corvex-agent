@@ -16,8 +16,11 @@ purpose: renaming it would touch every import in every file.
 | `config/corvex.go`, `config/corvex_test.go` | Agent default paths; Wings defaults for configs read from `/etc/pterodactyl/config.yml` |
 | `system/corvex.go`, `system/corvex_test.go` | `daemon`, `agent_version`, `features` for `GET /api/system` |
 | `packaging/corvex-agent.service` | systemd unit `corvex-agent.service` |
-| `scripts/build-release.sh` | Reproducible release build (`CGO_ENABLED=0`, `-trimpath`, `-buildid=`) |
-| `.github/workflows/corvex-ci.yaml`, `corvex-release.yaml`, `corvex-upstream.yaml` | CI, signed releases, weekly upstream merge |
+| `scripts/build-release.sh` | Reproducible release build (`CGO_ENABLED=0`, `-trimpath`, `-buildid=`): bare binaries plus `.tar.gz` archives with the license files |
+| `scripts/update-licenses.sh`, `third_party/` | Generates `THIRD_PARTY_NOTICES.md`, `third_party/licenses/` (license and NOTICE files of every Go module in the binary) and `third_party/source-modules.txt` with go-licenses |
+| `scripts/check-release.sh` | Checks a release: checksums, license files and source zips in every archive |
+| `corvex_legal.go`, `corvex_legal_test.go`, `cmd/license.go`, `cmd/license_test.go` | Embeds the license texts; `corvex-agent license [--all]` prints them. A local command only: no route, payload or config changes |
+| `.github/workflows/corvex-ci.yaml`, `corvex-release.yaml`, `corvex-upstream.yaml` | CI (incl. third-party notices current, release carries the license files), signed releases, weekly upstream merge |
 
 ## Removed files
 
@@ -31,6 +34,7 @@ purpose: renaming it would touch every import in every file.
 
 | File | Line(s) | Change | Reason |
 |---|---|---|---|
+| `.gitignore` | end | Re-includes `third_party/licenses/github.com/pterodactyl/wings/` (the upstream `wings` pattern would ignore it) | License files in the binary |
 | `config/config.go` | 31 | `DefaultLocation` = `/etc/corvex-agent/config.yml` | Default config location |
 | `config/config.go` | 140-156 | Default root, log, data, archive, backup and tmp paths under `corvex-agent` | New installs only (see `config/corvex.go`) |
 | `config/config.go` | 159, 205, 225 | Default system user `corvex`; passwd and machine-id files under `/run/corvex-agent` | New installs only (Wings values for a config in the Wings location) |
@@ -48,7 +52,7 @@ purpose: renaming it would touch every import in every file.
 | `cmd/root.go` | 50-57, 81, 87, 112, 114, 292 | Command name `corvex-agent`, help and log texts | Branding |
 | `cmd/root.go` | 69 | `version` prints `corvex-agent v<agent> (based on Pterodactyl Wings v<upstream>)` | `--version` |
 | `cmd/root.go` | 479-482 | Log file `corvex-agent.log` | Log name |
-| `cmd/root.go` | 492-519 | Startup banner and missing-config notice | Banner (MIT notice kept) |
+| `cmd/root.go` | 492-523 | Startup banner and missing-config notice; the banner also names the third-party components and the LGPL-3.0 module `github.com/juju/ratelimit` | Banner (MIT notice kept; LGPL-3.0 section 4(c)) |
 | `cmd/diagnostics.go` | 51-155 | Report title, versions, headers, log file | Diagnostics report |
 | `remote/http.go` | 128 | User-Agent `Corvex Agent/v<agent> (id:…)` | User agent (the `Accept` header is protocol and stays) |
 | `router/downloader/downloader.go` | 26, 214 | User-Agent `Corvex Agent/v<agent>` for remote file pulls | User agent |

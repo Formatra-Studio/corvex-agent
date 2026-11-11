@@ -14,6 +14,20 @@ permissions:
   contents: read
 
 jobs:
+  # A job of its own, so the go-licenses tool never runs where the release binaries are built.
+  notices:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Third-party notices are current
+        run: |
+          go install github.com/google/go-licenses/v2@v2.0.1
+          scripts/update-licenses.sh --check
+
   build:
     runs-on: ubuntu-24.04
     steps:
@@ -32,6 +46,9 @@ jobs:
           scripts/build-release.sh "$version" dist
           scripts/build-release.sh "$version" /tmp/check
           diff dist/SHA256SUMS /tmp/check/SHA256SUMS
+      # Binaries, archives with LICENSE, NOTICE, THIRD_PARTY_NOTICES.md, third_party/ (README: Release).
+      - name: Check release contents
+        run: scripts/check-release.sh "${GITHUB_REF_NAME#v}" dist
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: unsigned
@@ -39,7 +56,7 @@ jobs:
           if-no-files-found: error
 
   sign:
-    needs: build
+    needs: [notices, build]
     runs-on: ubuntu-24.04
     environment: agent-release
     permissions:
@@ -60,7 +77,8 @@ jobs:
           trap 'rm -f "$key"' EXIT
           printf '%s\n' "$AGENT_SIGNING_KEY" > "$key"
           openssl pkey -in "$key" -pubout -out dist/corvex-agent-signing.pub
-          for f in corvex-agent_linux_amd64 corvex-agent_linux_arm64 SHA256SUMS; do
+          for f in corvex-agent_linux_amd64 corvex-agent_linux_arm64 \
+            corvex-agent_linux_amd64.tar.gz corvex-agent_linux_arm64.tar.gz SHA256SUMS; do
             openssl pkeyutl -sign -rawin -inkey "$key" -in "dist/$f" -out "dist/$f.sig"
             openssl pkeyutl -verify -rawin -pubin -inkey dist/corvex-agent-signing.pub -in "dist/$f" -sigfile "dist/$f.sig"
           done
@@ -71,4 +89,4 @@ jobs:
           gh release create "$GITHUB_REF_NAME" dist/* \
             --repo "$GITHUB_REPOSITORY" \
             --title "Corvex Agent $GITHUB_REF_NAME" \
-            --notes "Based on Pterodactyl Wings v$(echo "${GITHUB_REF_NAME#v}" | cut -d- -f1). SHA-256 checksums in SHA256SUMS; Ed25519 signatures in *.sig."
+            --notes "Based on Pterodactyl Wings v$(echo "${GITHUB_REF_NAME#v}" | cut -d- -f1) (MIT). The .tar.gz archives hold each binary with LICENSE, NOTICE, THIRD_PARTY_NOTICES.md, the license texts of every Go module in it and the source of its MPL-2.0 and LGPL-3.0 modules; \`corvex-agent license --all\` prints the same texts. SHA-256 checksums in SHA256SUMS; Ed25519 signatures in *.sig."

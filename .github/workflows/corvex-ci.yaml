@@ -30,8 +30,13 @@ jobs:
         env:
           CGO_ENABLED: 1
         run: go test -race ./...
-      - name: Release build is reproducible
+      - name: Third-party notices are current
+        run: |
+          go install github.com/google/go-licenses/v2@v2.0.1
+          scripts/update-licenses.sh --check
+      - name: Release build is reproducible and carries the license files
         run: |
           scripts/build-release.sh 0.0.0-cvx.0 /tmp/a
           scripts/build-release.sh 0.0.0-cvx.0 /tmp/b
           diff /tmp/a/SHA256SUMS /tmp/b/SHA256SUMS
+          scripts/check-release.sh 0.0.0-cvx.0 /tmp/a

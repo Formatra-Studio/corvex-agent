@@ -499,7 +499,11 @@ Corvex Agent is based on Pterodactyl Wings (MIT): https://github.com/pterodactyl
 
 This software is made available under the terms of the MIT license.
 The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.%s`), system.AgentVersion, system.Version, time.Now().Year(), "\n\n")
+in all copies or substantial portions of the Software.
+
+Includes third-party components under their own licenses, among them
+github.com/juju/ratelimit (LGPL-3.0, Copyright (C) 2015 Canonical Ltd.).
+Run "corvex-agent license --all" for every license text.%s`), system.AgentVersion, system.Version, time.Now().Year(), "\n\n")
 }
 
 func exitWithConfigurationNotice() {
